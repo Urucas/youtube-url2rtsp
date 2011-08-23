@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>url2rtsp example</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript" src="../url2rtsp.js"></script>		
+		<script type="text/javascript" src="../jquery-1.3.2.min.js"></script>		
+	</head>
+	<body>
+		<script type="text/javascript">
+			function searchURL() {
+				var url = document.getElementById("yt").value;
+				url2rtsp(url, function(response){
+					if(response == false) {
+						document.getElementById('rtsp_result').innerHTML = '<p style="color:red">Error while getting data, check console</p>';
+						return;
+					}
+					document.getElementById('rtsp_result').innerHTML = '<a href="' + response.toString() +'">Open RTSP</a<br /><p style="font-size:9px;">' + response.toString() + '</p>';
+				});
+			}
+		</script>
+
+		<input type="text" id="yt" value="Enter youtube url" />	
+		<input type="button" value="Search" onclick="searchURL()" />
+		<div id="rtsp_result"></div>
+
+	</body>
+</html>
