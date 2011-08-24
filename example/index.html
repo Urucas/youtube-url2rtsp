@@ -4,24 +4,29 @@
 	<head>
 		<title>url2rtsp example</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript" src="../ajax.js"></script>		
+		<script type="text/javascript" src="../json2.js"></script>		
 		<script type="text/javascript" src="../url2rtsp.js"></script>		
-		<script type="text/javascript" src="../jquery-1.3.2.min.js"></script>		
 	</head>
 	<body>
 		<script type="text/javascript">
 			function searchURL() {
 				var url = document.getElementById("yt").value;
-				url2rtsp(url, function(response){
+				var div = document.getElementById('rtsp_result');
+					div.innerHTML = "Loading...";
+				url2rtsp.getRTSP(url, function(response){
+					// rtsp not available
 					if(response == false) {
-						document.getElementById('rtsp_result').innerHTML = '<p style="color:red">Error while getting data, check console</p>';
+						div.innerHTML = '<p style="color:red">Error while getting data, check console</p>';
 						return;
 					}
-					document.getElementById('rtsp_result').innerHTML = '<a href="' + response.toString() +'">Open RTSP</a<br /><p style="font-size:9px;">' + response.toString() + '</p>';
+					// success
+					div.innerHTML = '<a href="'+response.toString()+'">Open RTSP</a<br /><p style="font-size:9px;">'+response.toString()+'</p>';
 				});
 			}
 		</script>
 
-		<input type="text" id="yt" value="Enter youtube url" />	
+		<input type="text" id="yt" value="http://www.youtube.com/watch?v=Jela4o4qUHM" />	
 		<input type="button" value="Search" onclick="searchURL()" />
 		<div id="rtsp_result"></div>
 
