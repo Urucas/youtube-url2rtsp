@@ -1,44 +1,75 @@
-function url2rtsp(ytURL, callback) {
+function _url2rtsp() {
+	
+	this._urls = [];
+	this._ajax = new _ajax();
 
-	var aURL = ytURL.split('?'); 
-	try {
-		aURL = aURL[1].toString();
-	}catch(e) {
-		console.log("Invalid url format, missing ?");
-		console.log(ytURL);
-		callback(false);
-	}
-    if (aURL.indexOf('&') == -1) {
-		console.log("Invalid url format, missing &");
-		console.log(ytURL);
-    	callback(false);
-    }
-    var nvPairs = aURL.split("&");
-    var videoID = null;
-    for (i = 0; i < nvPairs.length; i++) {
-	    var nvPair = nvPairs[i].split("=");
-        var name = nvPair[0];
-        if (name == "v") {
- 	       videoID = nvPair[1];
-        }
-    }
-    if(videoID == null) {
-		console.log("Invalid url format, missing v param");
-		console.log(ytURL);
-		callback(false);
-    }
-    console.log("video id: " + videoID);
-	var api_url = "https://gdata.youtube.com/feeds/api/videos?q=" + videoID + "&format=1&alt=json";
-	$.getJSON(api_url, [], function(data) {
-    	try { 
- 	     	var rtsp_url = data.feed.entry[0].media$group.media$content[1].url;
- 			callback(rtsp_url);
+	this.hasRTSP = function(vID) {
+		var len = this._urls.length;
+		for(var i  = 0; i < len; i++) {
+			var _url = this._urls[i];
+			if(_url.vID == vID) {
+				return _url;
+			}
 		}
-        catch(e) {
-			console.log("Invalid json response, missing rtsp lilnk");
-			console.log(e);
-            callback(false);
-        }
-     });
-}
+		return false;
+	}	
 
+	this.getRTSP = function(ytURL, callback) {
+	
+		var vID = this.getVideoID(ytURL);
+		if(vID == false) {
+			callback(false);
+			return;
+		}
+		var _url = this.hasRTSP(vID);
+		if(_url !== false) {
+			callback(_url.rtsp);
+			return;
+		}
+		var obj = this;
+		this._ajax.get("http://gdata.youtube.com/feeds/api/videos?q=" + vID + "&format=1&alt=json" , function(data){
+    		try { 
+ 	     		var rtsp = data.feed.entry[0].media$group.media$content[1].url;
+				obj._urls.push({"vID": vID, "ytURL": ytURL, "rtsp": rtsp });
+ 				callback(rtsp);
+			}
+        	catch(e) {
+				console.log("Invalid json response, missing rtsp lilnk");
+				console.log(e);
+            	callback(false);
+        	}
+		});
+	}
+
+	this.getVideoID = function(ytURL) {
+		
+		var aURL = ytURL.split('?'); 
+		try {
+			aURL = aURL[1].toString();
+		}catch(e) {
+			console.log("Invalid url format, missing ?");
+			console.log(ytURL);
+			return false;
+		}
+    	if (aURL.indexOf('&') == -1) {
+			aURL += '&';
+    	}
+	    var nvPairs = aURL.split("&");
+    	var videoID = null;
+    	for (i = 0; i < nvPairs.length; i++) {
+	    	var nvPair = nvPairs[i].split("=");
+        	var name = nvPair[0];
+        	if (name == "v") {
+ 	       	videoID = nvPair[1];
+        	}
+    	}
+    	if(videoID == null) {
+			console.log("Invalid url format, missing v param");
+			console.log(ytURL);
+			return false;
+    	}
+		return videoID;
+	}	
+}
+// creates new instance
+var url2rtsp = new _url2rtsp();
