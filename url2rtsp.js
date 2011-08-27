@@ -29,9 +29,14 @@ function _url2rtsp() {
 		var obj = this;
 		this._ajax.get("http://gdata.youtube.com/feeds/api/videos?q=" + vID + "&format=1&alt=json" , function(data){
     		try { 
- 	     		var rtsp = data.feed.entry[0].media$group.media$content[1].url;
-				obj._urls.push({"vID": vID, "ytURL": ytURL, "rtsp": rtsp });
- 				callback(rtsp);
+				var resp = { 
+					"vID"   : vID, 
+					"ytURL" : ytURL, 
+					"rtsp"  : data.feed.entry[0].media$group.media$content[1].url, 
+					"thumb" : data.feed.entry[0].media$group.media$thumbnail[1].url
+				};
+				obj._urls.push(resp);
+ 				callback(resp);
 			}
         	catch(e) {
 				console.log("Invalid json response, missing rtsp lilnk");
